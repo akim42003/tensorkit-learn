@@ -95,7 +95,6 @@ class Tensor {
 
         // matrix multiplication 
         Tensor matmul(const Tensor& other) const {
-            // Check if dimensions are compatible
             if (shape.size() != 2 || other.shape.size() != 2) {
                 throw std::invalid_argument("Matrix multiplication is defined for 2D tensors only");
             }
@@ -103,7 +102,6 @@ class Tensor {
                 throw std::invalid_argument("Incompatible dimensions for matrix multiplication");
             }
 
-            // Define the result tensor with the correct shape
             Tensor result({shape[0], other.shape[1]});
 
             // Perform the multiplication
@@ -115,12 +113,30 @@ class Tensor {
                         size_t thisIndex = i * strides[0] + k * strides[1];
                         size_t otherIndex = k * other.strides[0] + j * other.strides[1];
 
-                        // Access elements directly from data vectors
                         sum += data[thisIndex] * other.data[otherIndex];
                     }
                     // Set result using its strides
                     size_t resultIndex = i * result.strides[0] + j * result.strides[1];
                     result.data[resultIndex] = sum;
+                }
+            }
+
+            return result;
+        }
+
+        Tensor Tp() const {
+            if (shape.size() != 2){
+                throw invalid_argument ("Matrices must be 2D");
+            }
+
+            Tensor result({shape[1], shape[0]});
+
+            for (size_t i = 0; i < shape[0]; ++i) {
+                for (size_t j = 0; j < shape[1]; ++j) {
+                    // Access elements directly using data and strides
+                    size_t originalIndex = i * strides[0] + j * strides[1];
+                    size_t transposedIndex = j * result.strides[0] + i * result.strides[1];
+                    result.data[transposedIndex] = data[originalIndex];
                 }
             }
 
@@ -174,10 +190,14 @@ int main() {
 
     // cout << dot_result << endl;
 
-    Tensor multiplied_tensor = tensor1.matmul(tensor2);
-    tensor1.print();
-    tensor2.print();
-    multiplied_tensor.print();
+    // Tensor multiplied_tensor = tensor1.matmul(tensor2);
+    // tensor1.print();
+    // tensor2.print();
+    // multiplied_tensor.print();
+
+    Tensor transposed_matrix = tensor1.Tp();
+
+    transposed_matrix.print();
 
     return 0;
 
