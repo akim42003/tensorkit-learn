@@ -53,22 +53,93 @@ class Tensor {
             }
             cout << "\n";
         }
+        // overload + for tensor addition
+        Tensor operator+(const Tensor& other) {
+            if (shape != other.shape){
+                throw invalid_argument("Shapes for addition must match");
+            }
+            Tensor result(shape);
+            for (size_t i = 0; i < data.size(); i++){
+                result.data[i] = data[i] + other.data[i];
+            }
+            return result;
+        }
+        //overload - for tensor subtraction
+        Tensor operator-(const Tensor& other) {
+            if (shape != other.shape){
+                throw invalid_argument("Shapes for subtraction must match");
+            }
+            Tensor result(shape);
+            for (size_t i = 0; i <data.size(); i++){
+                result.data[i] = data[i] - other.data[i];
+            }
+            return result;
+        }
+        //dot product for vectors 
+        float dot(Tensor& other) const{
+            if (shape.size() != 1 || other.shape.size() != 1) {
+                throw std::invalid_argument("Dot product is defined for vectors only");
+            }
+            if (shape[0] != other.shape[0]) {
+                throw std::invalid_argument("Vectors must have the same length for dot product");
+            }
+
+            float result = 0;
+
+            for (size_t i = 0; i < data.size(); i++){
+                result += data[i]* other.data[i];
+            }
+
+            return result;
+        }
+
 };
 
 int main() {
-    Tensor tensor({2, 3});  // Create a 2x3 tensor
+    // Tensor tensor1({2, 3});  // Create a 2x3 tensor
 
-    tensor({0, 0}) = 1.0;  // Set values
-    tensor({0, 1}) = 2.0;
-    tensor({0, 2}) = 3.0;
-    tensor({1, 0}) = 4.0;
-    tensor({1, 1}) = 5.0;
-    tensor({1, 2}) = 6.0;
+    // tensor1({0, 0}) = 1.0;  // Set values
+    // tensor1({0, 1}) = 2.0;
+    // tensor1({0, 2}) = 3.0;
+    // tensor1({1, 0}) = 4.0;
+    // tensor1({1, 1}) = 5.0;
+    // tensor1({1, 2}) = 6.0;
 
-    cout << "Tensor contents:\n";
-    tensor.print();  // Print the tensor
+    // Tensor tensor2({2,3});
 
-    cout << "Element at (1, 2): " << tensor({1,2}) << "\n";
+    // tensor2({0,0}) = 2;
+    // tensor2({0,1}) = 1;
+    // tensor2({0,2}) = 0;
+    // tensor2({1,0}) = 0;
+    // tensor2({1,1}) = 1;
+    // tensor2({1,2}) = 2;
+
+
+    // Tensor eg_tensors = tensor1 - tensor2;
+
+    // eg_tensors.print();
+//     cout << "Tensor contents:\n";
+//     tensor.print();  // Print the tensor
+
+//     cout << "Element at (1, 2): " << tensor({1,2}) << "\n";
+
+    Tensor tensor1({3});
+    
+    tensor1({0}) = 1;
+    tensor1({1}) = 2;
+    tensor1({2}) = 0;
+
+    Tensor tensor2({3});
+
+    tensor2({0}) = 2;
+    tensor2({1}) = 2;
+    tensor2({2}) = 10;
+
+    float dot_result = tensor1.dot(tensor2);
+
+    cout << dot_result << endl;
 
     return 0;
+
+
 }
