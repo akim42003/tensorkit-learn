@@ -93,26 +93,61 @@ class Tensor {
             return result;
         }
 
+        // matrix multiplication 
+        Tensor matmul(const Tensor& other) const {
+            // Check if dimensions are compatible
+            if (shape.size() != 2 || other.shape.size() != 2) {
+                throw std::invalid_argument("Matrix multiplication is defined for 2D tensors only");
+            }
+            if (shape[1] != other.shape[0]) {
+                throw std::invalid_argument("Incompatible dimensions for matrix multiplication");
+            }
+
+            // Define the result tensor with the correct shape
+            Tensor result({shape[0], other.shape[1]});
+
+            // Perform the multiplication
+            for (size_t i = 0; i < shape[0]; ++i) {
+                for (size_t j = 0; j < other.shape[1]; ++j) {
+                    float sum = 0.0;
+                    for (size_t k = 0; k < shape[1]; ++k) {
+                        // Compute flattened indices manually
+                        size_t thisIndex = i * strides[0] + k * strides[1];
+                        size_t otherIndex = k * other.strides[0] + j * other.strides[1];
+
+                        // Access elements directly from data vectors
+                        sum += data[thisIndex] * other.data[otherIndex];
+                    }
+                    // Set result using its strides
+                    size_t resultIndex = i * result.strides[0] + j * result.strides[1];
+                    result.data[resultIndex] = sum;
+                }
+            }
+
+            return result;
+        }
+
+
 };
 
 int main() {
-    // Tensor tensor1({2, 3});  // Create a 2x3 tensor
+    Tensor tensor1({2, 3});  // Create a 2x3 tensor
 
-    // tensor1({0, 0}) = 1.0;  // Set values
-    // tensor1({0, 1}) = 2.0;
-    // tensor1({0, 2}) = 3.0;
-    // tensor1({1, 0}) = 4.0;
-    // tensor1({1, 1}) = 5.0;
-    // tensor1({1, 2}) = 6.0;
+    tensor1({0, 0}) = 1.0;  
+    tensor1({0, 1}) = 2.0;
+    tensor1({0, 2}) = 3.0;
+    tensor1({1, 0}) = 4.0;
+    tensor1({1, 1}) = 5.0;
+    tensor1({1, 2}) = 6.0;
 
-    // Tensor tensor2({2,3});
+    Tensor tensor2({3,2});
 
-    // tensor2({0,0}) = 2;
-    // tensor2({0,1}) = 1;
-    // tensor2({0,2}) = 0;
-    // tensor2({1,0}) = 0;
-    // tensor2({1,1}) = 1;
-    // tensor2({1,2}) = 2;
+    tensor2({0,0}) = 2;
+    tensor2({0,1}) = 1;
+    tensor2({1,0}) = 0;
+    tensor2({1,1}) = 0;
+    tensor2({2,0}) = 1;
+    tensor2({2,1}) = 2;
 
 
     // Tensor eg_tensors = tensor1 - tensor2;
@@ -123,21 +158,26 @@ int main() {
 
 //     cout << "Element at (1, 2): " << tensor({1,2}) << "\n";
 
-    Tensor tensor1({3});
+    // Tensor tensor1({3});
     
-    tensor1({0}) = 1;
-    tensor1({1}) = 2;
-    tensor1({2}) = 0;
+    // tensor1({0}) = 1;
+    // tensor1({1}) = 2;
+    // tensor1({2}) = 0;
 
-    Tensor tensor2({3});
+    // Tensor tensor2({3});
 
-    tensor2({0}) = 2;
-    tensor2({1}) = 2;
-    tensor2({2}) = 10;
+    // tensor2({0}) = 2;
+    // tensor2({1}) = 2;
+    // tensor2({2}) = 10;
 
-    float dot_result = tensor1.dot(tensor2);
+    // float dot_result = tensor1.dot(tensor2);
 
-    cout << dot_result << endl;
+    // cout << dot_result << endl;
+
+    Tensor multiplied_tensor = tensor1.matmul(tensor2);
+    tensor1.print();
+    tensor2.print();
+    multiplied_tensor.print();
 
     return 0;
 
