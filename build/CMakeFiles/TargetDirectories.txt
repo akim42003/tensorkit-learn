@@ -1,0 +1,3 @@
+/Users/alex/tensorkit-learn/build/CMakeFiles/tensor_slow.dir
+/Users/alex/tensorkit-learn/build/CMakeFiles/edit_cache.dir
+/Users/alex/tensorkit-learn/build/CMakeFiles/rebuild_cache.dir
