@@ -23,3 +23,9 @@ Makefile
 
 # MacOS-specific files
 .DS_Store
+
+# IDE-specific files
+.vscode/
+
+# Compiled binaries
+tensor
