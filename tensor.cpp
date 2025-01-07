@@ -123,7 +123,7 @@ class Tensor {
 
             return result;
         }
-
+        //2D Matrix Transposition (will add higher dimensions at a later date)
         Tensor Tp() const {
             if (shape.size() != 2){
                 throw invalid_argument ("Matrices must be 2D");
@@ -143,18 +143,89 @@ class Tensor {
             return result;
         }
 
+        Tensor inverse() const {
+            if (shape.size() != 2 || shape[0] != shape[1]){
+                throw invalid_argument("Matrices are nonsingular if and only if they are square");
+            }
+            size_t n = shape[0];
+            Tensor augmented({n, 2 * n});
+
+            // Create the augmented matrix [A | I]
+            for (size_t i = 0; i < n; ++i) {
+                for (size_t j = 0; j < n; ++j) {
+                    // Access `data` directly
+                    augmented.data[i * augmented.strides[0] + j * augmented.strides[1]] = 
+                        data[i * strides[0] + j * strides[1]];
+                }
+                augmented.data[i * augmented.strides[0] + (n + i) * augmented.strides[1]] = 1.0; // Identity matrix
+            }
+
+            // Perform Gaussian elimination
+            for (size_t i = 0; i < n; ++i) {
+                // Ensure the pivot element is non-zero
+                size_t pivot_index = i * augmented.strides[0] + i * augmented.strides[1];
+                if (augmented.data[pivot_index] == 0.0) {
+                    // Swap with a row below that has a non-zero pivot
+                    bool swapped = false;
+                    for (size_t k = i + 1; k < n; ++k) {
+                        size_t swap_index = k * augmented.strides[0] + i * augmented.strides[1];
+                        if (augmented.data[swap_index] != 0.0) {
+                            for (size_t j = 0; j < 2 * n; ++j) {
+                                std::swap(
+                                    augmented.data[i * augmented.strides[0] + j * augmented.strides[1]],
+                                    augmented.data[k * augmented.strides[0] + j * augmented.strides[1]]
+                                );
+                            }
+                            swapped = true;
+                            break;
+                        }
+                    }
+                    if (!swapped) {
+                        throw std::runtime_error("Matrix is singular and cannot be inverted");
+                    }
+                }
+
+                // Normalize the pivot row
+                float pivot = augmented.data[pivot_index];
+                for (size_t j = 0; j < 2 * n; ++j) {
+                    augmented.data[i * augmented.strides[0] + j * augmented.strides[1]] /= pivot;
+                }
+
+                // Eliminate other rows
+                for (size_t k = 0; k < n; ++k) {
+                    if (k == i) continue;
+                    float factor = augmented.data[k * augmented.strides[0] + i * augmented.strides[1]];
+                    for (size_t j = 0; j < 2 * n; ++j) {
+                        augmented.data[k * augmented.strides[0] + j * augmented.strides[1]] -=
+                            factor * augmented.data[i * augmented.strides[0] + j * augmented.strides[1]];
+                    }
+                }
+            }
+
+            // Extract the inverse matrix [I | A^-1]
+            Tensor inverse({n, n});
+            for (size_t i = 0; i < n; ++i) {
+                for (size_t j = 0; j < n; ++j) {
+                    inverse.data[i * inverse.strides[0] + j * inverse.strides[1]] =
+                        augmented.data[i * augmented.strides[0] + (n + j) * augmented.strides[1]];
+                }
+            }
+
+            return inverse;
+        }
+
 
 };
 
 int main() {
-    Tensor tensor1({2, 3});  // Create a 2x3 tensor
+    Tensor tensor1({2, 2});  // Create a 2x3 tensor
 
     tensor1({0, 0}) = 1.0;  
     tensor1({0, 1}) = 2.0;
-    tensor1({0, 2}) = 3.0;
+    // tensor1({0, 2}) = 3.0;
     tensor1({1, 0}) = 4.0;
     tensor1({1, 1}) = 5.0;
-    tensor1({1, 2}) = 6.0;
+    // tensor1({1, 2}) = 6.0;
 
     Tensor tensor2({3,2});
 
@@ -195,9 +266,16 @@ int main() {
     // tensor2.print();
     // multiplied_tensor.print();
 
-    Tensor transposed_matrix = tensor1.Tp();
+    // Tensor transposed_matrix = tensor1.Tp();
 
-    transposed_matrix.print();
+    // transposed_matrix.print();
+
+    // Compute the inverse
+    Tensor inverseMatrix = tensor1.inverse();
+
+    // Print the inverse matrix
+    cout << "Inverse Matrix:\n";
+    inverseMatrix.print();
 
     return 0;
 
