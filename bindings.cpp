@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/operators.h> // Required for py::self
 #include "tensor.h" // Include your Tensor class header
 
 namespace py = pybind11;
@@ -26,5 +27,9 @@ PYBIND11_MODULE(tensor_slow, m) {
         // Tensor operations
         .def("matmul", &Tensor::matmul, "Perform matrix multiplication")
         .def("Tp", &Tensor::Tp, "Transpose the tensor (2D only)")
-        .def("inverse", &Tensor::inverse, "Calculate the inverse of the tensor (2D square matrices only)");
+        .def("inverse", &Tensor::inverse, "Calculate the inverse of the tensor (2D square matrices only)")
+
+        // Tensor arithmetic
+        .def("tplus", &Tensor::tplus, "Perform tensor addition")  // Bind operator+
+        .def("tminus", &Tensor::tminus, "Perform tensor subtraction"); // Bind operator-
 }

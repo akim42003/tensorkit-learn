@@ -34,7 +34,6 @@ float& Tensor::operator()(const std::vector<size_t>& indices) {
     return data[offset];
 }
 
-// Const version for read-only access
 const float& Tensor::operator()(const std::vector<size_t>& indices) const {
     if (indices.size() != shape.size()) {
         throw std::invalid_argument("Invalid number of indices");
@@ -45,7 +44,6 @@ const float& Tensor::operator()(const std::vector<size_t>& indices) const {
     }
     return data[offset];
 }
-
 // Get the shape of the tensor
 const std::vector<size_t>& Tensor::getShape() const {
     return shape;
@@ -63,7 +61,7 @@ void Tensor::print() const {
 }
 
 // Overload + for tensor addition
-Tensor Tensor::operator+(const Tensor& other) {
+Tensor Tensor::tplus(const Tensor& other) {
     if (shape != other.shape) {
         throw std::invalid_argument("Shapes for addition must match");
     }
@@ -75,7 +73,7 @@ Tensor Tensor::operator+(const Tensor& other) {
 }
 
 // Overload - for tensor subtraction
-Tensor Tensor::operator-(const Tensor& other) {
+Tensor Tensor::tminus(const Tensor& other) {
     if (shape != other.shape) {
         throw std::invalid_argument("Shapes for subtraction must match");
     }

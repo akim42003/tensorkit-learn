@@ -28,8 +28,8 @@ public:
     void print() const;
 
     // Arithmetic Operations
-    Tensor operator+(const Tensor& other);
-    Tensor operator-(const Tensor& other);
+    Tensor tplus(const Tensor& other);
+    Tensor tminus(const Tensor& other);
 
     // Dot Product
     float dot(Tensor& other) const;
