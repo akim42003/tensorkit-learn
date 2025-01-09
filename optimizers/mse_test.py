@@ -120,7 +120,7 @@ def run_mse_tests():
     test_mse_backward_1d()
     test_mse_forward_2d()
     test_mse_backward_2d()
-    print("\nAll MSE tests passed!")
+    
 
 
 if __name__ == "__main__":
