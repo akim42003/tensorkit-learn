@@ -2,37 +2,33 @@ import tensor_slow as ts
 
 class MSELoss:
     """Mean Squared Error Loss"""
-    
+
     def __init__(self):
         pass
 
     def forward(self, predictions, targets):
-        """
-        Compute the forward pass for MSE loss.
-        
-        Args:
-            predictions (Tensor): Predicted values.
-            targets (Tensor): Ground truth values.
-        
-        Returns:
-            Tensor: Scalar Tensor representing the MSE loss.
-        """
+        if predictions.getShape() != targets.getShape():
+            raise ValueError("Predictions and targets must have the same shape")
+
         error = predictions.tminus(targets)
-        squared_error = error.matmul(error.Tp())  # Element-wise square and sum
-        num_elements = ts.Tensor([len(predictions.get_shape())])
-        loss = squared_error.tplus(num_elements.inverse())
-        return loss
+        squared_error_sum = 0.0
+        num_elements = predictions.getShape()[0]
+        for i in range(num_elements):
+            squared_error_sum += error[[i]] ** 2
+
+        mse = squared_error_sum / num_elements
+        return mse
 
     def backward(self, predictions, targets):
-        """
-        Compute the gradient of the MSE loss with respect to predictions.
-        
-        Args:
-            predictions (Tensor): Predicted values.
-            targets (Tensor): Ground truth values.
-        
-        Returns:
-            Tensor: Gradient Tensor with the same shape as predictions.
-        """
+        if predictions.getShape() != targets.getShape():
+            raise ValueError("Predictions and targets must have the same shape")
+
         error = predictions.tminus(targets)
-        grad = error.tplus(ts.Tensor)
+        num_elements = predictions.getShape()[0]
+
+        # Compute gradient for each element
+        grad = ts.Tensor([num_elements])  # Shape of the gradient matches predictions
+        for i in range(num_elements):
+            grad[[i]] = 2 * error[[i]] / num_elements
+
+        return grad
