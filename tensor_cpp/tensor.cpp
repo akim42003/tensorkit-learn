@@ -191,3 +191,32 @@ Tensor Tensor::inverse() const {
 
     return inverse;
 }
+
+// Static method to create a tensor filled with zeros
+Tensor Tensor::zeros(const std::vector<size_t>& shape) {
+    return Tensor(shape);
+}
+
+// Static method to create a tensor filled with ones
+Tensor Tensor::ones(const std::vector<size_t>& shape) {
+    Tensor t(shape);
+    for (auto& val : t.data) {
+        val = 1.0f;
+    }
+    return t;
+}
+
+// Static method to create a tensor from a list of values
+Tensor Tensor::from_values(const std::vector<size_t>& shape, const std::vector<float>& values) {
+    size_t total_size = 1;
+    for (size_t dim : shape) {
+        total_size *= dim;
+    }
+    if (values.size() != total_size) {
+        throw std::invalid_argument("Values size must match the total size of the tensor");
+    }
+
+    Tensor t(shape);
+    t.data = values;
+    return t;
+}

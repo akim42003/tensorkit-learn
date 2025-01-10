@@ -1,9 +1,8 @@
 #ifndef TENSOR_H
 #define TENSOR_H
 
-#include <iostream>
 #include <vector>
-#include <stdexcept>
+#include <iostream>
 
 class Tensor {
 private:
@@ -41,6 +40,10 @@ public:
     // Inverse
     Tensor inverse() const;
 
+    // Static Methods for Tensor Creation
+    static Tensor zeros(const std::vector<size_t>& shape);
+    static Tensor ones(const std::vector<size_t>& shape);
+    static Tensor from_values(const std::vector<size_t>& shape, const std::vector<float>& values);
 };
 
 #endif // TENSOR_H
