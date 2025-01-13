@@ -50,30 +50,30 @@ Tensor LogLink::inverse(const Tensor& eta) const {
 }
 
 
-int main() {
-    // Test IdentityLink
-    IdentityLink identity;
-    Tensor t = Tensor::from_values({2, 2}, {1.0, 2.0, 3.0, 4.0});
-    Tensor identity_result = identity(t);
-    identity_result.print();
+// int main() {
+//     // Test IdentityLink
+//     IdentityLink identity;
+//     Tensor t = Tensor::from_values({2, 2}, {1.0, 2.0, 3.0, 4.0});
+//     Tensor identity_result = identity(t);
+//     identity_result.print();
 
-    // Test LogitLink
-    LogitLink logit;
-    Tensor probabilities = Tensor::from_values({2, 2}, {0.2, 0.8, 0.6, 0.4});
-    Tensor logit_result = logit(probabilities);
-    logit_result.print();
+//     // Test LogitLink
+//     LogitLink logit;
+//     Tensor probabilities = Tensor::from_values({2, 2}, {0.2, 0.8, 0.6, 0.4});
+//     Tensor logit_result = logit(probabilities);
+//     logit_result.print();
 
-    Tensor inverse_logit_result = logit.inverse(logit_result);
-    inverse_logit_result.print();
+//     Tensor inverse_logit_result = logit.inverse(logit_result);
+//     inverse_logit_result.print();
 
-    // Test LogLink
-    LogLink log;
-    Tensor positive_values = Tensor::from_values({2, 2}, {1.0, 2.0, 3.0, 4.0});
-    Tensor log_result = log(positive_values);
-    log_result.print();
+//     // Test LogLink
+//     LogLink log;
+//     Tensor positive_values = Tensor::from_values({2, 2}, {1.0, 2.0, 3.0, 4.0});
+//     Tensor log_result = log(positive_values);
+//     log_result.print();
 
-    Tensor inverse_log_result = log.inverse(log_result);
-    inverse_log_result.print();
+//     Tensor inverse_log_result = log.inverse(log_result);
+//     inverse_log_result.print();
 
-    return 0;
-}
+//     return 0;
+// }
