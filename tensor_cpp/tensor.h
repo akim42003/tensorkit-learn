@@ -39,8 +39,8 @@ public:
     Tensor Tp() const;
 
     //Element wise operations
-    Tensor log() const;
-    Tensor exp() const;
+    Tensor log() const; //natural log
+    Tensor exp() const; 
     Tensor divide(const Tensor& other) const;
 
 
