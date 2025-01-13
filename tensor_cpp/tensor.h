@@ -29,7 +29,7 @@ public:
 
     // Arithmetic Operations
     Tensor tplus(const Tensor& other);
-    Tensor tminus(const Tensor& other);
+    Tensor tminus(const Tensor& other) const;
 
     // Dot Product
     float dot(Tensor& other) const;

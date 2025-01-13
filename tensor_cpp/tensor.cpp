@@ -73,7 +73,7 @@ Tensor Tensor::tplus(const Tensor& other) {
 }
 
 // Overload - for tensor subtraction
-Tensor Tensor::tminus(const Tensor& other) {
+Tensor Tensor::tminus(const Tensor& other) const{
     if (shape != other.shape) {
         throw std::invalid_argument("Shapes for subtraction must match");
     }
