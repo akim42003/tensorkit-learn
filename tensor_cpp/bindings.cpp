@@ -41,6 +41,14 @@ PYBIND11_MODULE(tensor_slow, m) {
         .def("tplus", &Tensor::tplus, "Explicit tensor addition")
         .def("tminus", &Tensor::tminus, "Explicit tensor subtraction")
 
+        // Element wise operations
+
+        .def("log", &Tensor::log, "logarithm on tensor")
+        .def("exp", &Tensor::exp, "exponent on tensor")
+        .def("divide", &Tensor::divide, "division by element")
+
         //initializations (zeros, ones, from values)
+        .def_static("zeros", &Tensor::zeros, "Initialize tensor with zeros")
+
         .def_static("from_values", &Tensor::from_values, "Initialize tensor via matrix construction");
 }

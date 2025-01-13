@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 class Tensor {
 private:
@@ -36,6 +37,12 @@ public:
     // Matrix Operations
     Tensor matmul(const Tensor& other) const;
     Tensor Tp() const;
+
+    //Element wise operations
+    Tensor log() const;
+    Tensor exp() const;
+    Tensor divide(const Tensor& other) const;
+
 
     // Inverse
     Tensor inverse() const;

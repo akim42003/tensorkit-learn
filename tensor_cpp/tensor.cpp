@@ -84,6 +84,38 @@ Tensor Tensor::tminus(const Tensor& other) {
     return result;
 }
 
+// Element wise operations
+Tensor Tensor::log() const {
+    Tensor result(shape);
+    for (size_t i = 0; i < data.size(); ++i) {
+        result.data[i] = std::log(data[i]);
+    }
+    return result;
+}
+
+// Element-wise exponential
+Tensor Tensor::exp() const {
+    Tensor result(shape);
+    for (size_t i = 0; i < data.size(); ++i) {
+        result.data[i] = std::exp(data[i]);
+    }
+    return result;
+}
+
+// Element wise division
+
+Tensor Tensor::divide(const Tensor& other) const {
+    if (shape != other.shape) {
+        throw std::invalid_argument("Shapes must match for element-wise division");
+    }
+    Tensor result(shape);
+    for (size_t i = 0; i < data.size(); ++i) {
+        result.data[i] = data[i] / other.data[i];
+    }
+    return result;
+}
+
+
 // Dot product for vectors
 float Tensor::dot(Tensor& other) const {
     if (shape.size() != 1 || other.shape.size() != 1) {
