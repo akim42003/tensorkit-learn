@@ -5,7 +5,7 @@ from link_functions import LogitLink
 import math
 
 # Parameters for dataset
-num_samples = 10  # Number of samples
+num_samples = 100  # Number of samples
 num_features = 5   # Number of features
 
 # Generate synthetic input data (features)
@@ -17,7 +17,7 @@ for i in range(num_samples):
 X = ts.Tensor.from_values([num_samples, num_features], X_data)
 
 # Generate weights for linear combination
-true_weights = [0.5, -0.3, 0.2, 0.7, -0.5]  # True weights for synthetic data
+true_weights = [5, -3, 2, 7, -5]  # True weights for synthetic data
 true_weights_tensor = ts.Tensor.from_values([num_features, 1], true_weights)
 
 # Compute linear predictions and convert to probabilities with sigmoid
