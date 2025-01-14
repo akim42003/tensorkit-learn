@@ -46,6 +46,8 @@ PYBIND11_MODULE(tensor_slow, m) {
         .def("log", &Tensor::log, "logarithm on tensor")
         .def("exp", &Tensor::exp, "exponent on tensor")
         .def("divide", &Tensor::divide, "division by element")
+        //clamp values
+        .def("clamp", &Tensor::clamp, "clamp values")
 
         //initializations (zeros, ones, from values)
         .def_static("zeros", &Tensor::zeros, "Initialize tensor with zeros")

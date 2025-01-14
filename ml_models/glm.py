@@ -40,41 +40,55 @@ class GLM:
         predictions = self.forward(X)
         return self.loss_function.forward(predictions, y)
 
-    def train(self, X, y, learning_rate=0.01, epochs=100):
+    def train(self, X, y, learning_rate, max_iterations, tolerance):
         """
-        Train the model using gradient descent.
+        Train the model using an iterative solver with stability fixes.
+        """
+        epsilon = 1e-6  # Small value to prevent division/log issues
+        previous_loss = float('inf')
 
-        Args:
-            X: Input tensor of shape (num_samples, num_features).
-            y: Target tensor of shape (num_samples, 1).
-            learning_rate: Learning rate for gradient descent.
-            epochs: Number of epochs to train for.
-        """
-        for epoch in range(epochs):
+        for iteration in range(max_iterations):
             # Forward pass
             predictions = self.forward(X)
-
+            predictions = predictions.clamp(epsilon, 1 - epsilon)
             # Compute gradients
             gradients = self.loss_function.backward(predictions, y)
+            gradients.print()
+
+            # Gradient clipping for stability
+            gradients = gradients.clamp(-1.0, 1.0)
+            gradients.print()
 
             # Compute updates
             updates = X.Tp().matmul(gradients)  # Shape: [num_features, 1]
-
-            # Dynamically determine the shape of updates
-            updates_shape = [X.getShape()[1], 1]  # [num_features, 1]
-
-            # Create a tensor filled with learning_rate, matching the shape of updates
-            ones_matrix = ts.Tensor.from_values(updates_shape, [learning_rate] * (updates_shape[0] * updates_shape[1]))
-
-            # Add scaled ones_matrix to updates
+            updates.print()
+            # Create a ones matrix, scaled by the learning rate, matching the shape of updates
+            ones_matrix = ts.Tensor.from_values(updates.getShape(), [learning_rate] * (updates.getShape()[0] * updates.getShape()[1]))
             updates = updates.tplus(ones_matrix)
 
             # Update coefficients
             self.coefficients = self.coefficients.tminus(updates)
 
-            # Print loss for debugging
+            # Compute current loss
             current_loss = self.compute_loss(X, y)
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {current_loss}")
+
+            # Check for NaN values
+            # if ts.isnan(current_loss):
+            #     print("Encountered NaN loss. Stopping training.")
+            #     break
+
+            # Check for convergence
+            if abs(previous_loss - current_loss) < tolerance:
+                print(f"Converged after {iteration + 1} iterations. Final Loss: {current_loss}")
+                break
+
+            previous_loss = current_loss
+
+            # Print loss for debugging
+            print(f"Iteration {iteration + 1}, Loss: {current_loss}")
+
+        else:
+            print(f"Reached maximum iterations ({max_iterations}) without full convergence.")
 
 
 

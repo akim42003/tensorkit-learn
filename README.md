@@ -9,4 +9,7 @@ A tensor based machine library for educational and personal purposes
 
 ### Working on 
 - glm method in python first
+- testing glm class with synthetic data
 - rewriting loss functions in c++
+- data loader to read in dataset (csv format for example)
+

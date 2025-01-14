@@ -43,6 +43,9 @@ public:
     Tensor exp() const; 
     Tensor divide(const Tensor& other) const;
 
+    //clamp values
+
+    Tensor clamp(float min_value, float max_value) const;
 
     // Inverse
     Tensor inverse() const;

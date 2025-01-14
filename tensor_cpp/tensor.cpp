@@ -1,6 +1,8 @@
 #include "tensor.h" // Include the header file for the Tensor class
 #include <iostream>
 #include <stdexcept>
+#include <cmath>
+#include <limits>
 
 // Constructor
 Tensor::Tensor(const std::vector<size_t>& shape) : shape(shape) {
@@ -44,6 +46,7 @@ const float& Tensor::operator()(const std::vector<size_t>& indices) const {
     }
     return data[offset];
 }
+
 // Get the shape of the tensor
 const std::vector<size_t>& Tensor::getShape() const {
     return shape;
@@ -73,7 +76,7 @@ Tensor Tensor::tplus(const Tensor& other) {
 }
 
 // Overload - for tensor subtraction
-Tensor Tensor::tminus(const Tensor& other) const{
+Tensor Tensor::tminus(const Tensor& other) const {
     if (shape != other.shape) {
         throw std::invalid_argument("Shapes for subtraction must match");
     }
@@ -84,11 +87,16 @@ Tensor Tensor::tminus(const Tensor& other) const{
     return result;
 }
 
-// Element wise operations
+// Element wise operations: Logarithm
 Tensor Tensor::log() const {
     Tensor result(shape);
+    const float epsilon = 1e-6;  // Small constant to prevent log(0) or log(negative)
     for (size_t i = 0; i < data.size(); ++i) {
-        result.data[i] = std::log(data[i]);
+        if (data[i] <= 0.0f) {
+            result.data[i] = std::log(epsilon);  // Clamp to epsilon
+        } else {
+            result.data[i] = std::log(data[i]);
+        }
     }
     return result;
 }
@@ -96,25 +104,48 @@ Tensor Tensor::log() const {
 // Element-wise exponential
 Tensor Tensor::exp() const {
     Tensor result(shape);
+    const float max_exp = 88.0f;  // Clamp to prevent overflow
     for (size_t i = 0; i < data.size(); ++i) {
-        result.data[i] = std::exp(data[i]);
+        if (data[i] > max_exp) {
+            result.data[i] = std::exp(max_exp);
+        } else {
+            result.data[i] = std::exp(data[i]);
+        }
     }
     return result;
 }
 
 // Element wise division
-
 Tensor Tensor::divide(const Tensor& other) const {
     if (shape != other.shape) {
         throw std::invalid_argument("Shapes must match for element-wise division");
     }
     Tensor result(shape);
+    const float epsilon = 1e-6;  // Small constant to prevent division by zero
     for (size_t i = 0; i < data.size(); ++i) {
-        result.data[i] = data[i] / other.data[i];
+        if (other.data[i] == 0.0f) {
+            result.data[i] = data[i] / epsilon;  // Replace zero denominator with epsilon
+        } else {
+            result.data[i] = data[i] / other.data[i];
+        }
     }
     return result;
 }
 
+// Clamp values
+Tensor Tensor::clamp(float min_value, float max_value) const {
+    Tensor result(shape);
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (data[i] < min_value) {
+            result.data[i] = min_value;
+        } else if (data[i] > max_value) {
+            result.data[i] = max_value;
+        } else {
+            result.data[i] = data[i];
+        }
+    }
+    return result;
+}
 
 // Dot product for vectors
 float Tensor::dot(Tensor& other) const {
@@ -192,10 +223,11 @@ Tensor Tensor::inverse() const {
     }
 
     // Gaussian elimination
+    const float tolerance = 1e-6;  // Small tolerance for near-zero values
     for (size_t i = 0; i < n; ++i) {
         size_t pivot_index = i * augmented.strides[0] + i * augmented.strides[1];
-        if (augmented.data[pivot_index] == 0.0) {
-            throw std::runtime_error("Matrix is singular and cannot be inverted");
+        if (std::abs(augmented.data[pivot_index]) < tolerance) {
+            throw std::runtime_error("Matrix is singular or near-singular and cannot be inverted");
         }
 
         float pivot = augmented.data[pivot_index];
