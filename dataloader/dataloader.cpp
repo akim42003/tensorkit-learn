@@ -1,0 +1,91 @@
+//dataloader functions
+#include "dataloader.h"
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <stdexcept>
+#include <random>
+
+// Constructor
+DataLoader::DataLoader(const std::string& file_path, const std::vector<size_t>& tensor_shape, size_t batch_size, bool shuffle)
+    : batch_size(batch_size), shuffle(shuffle) {
+    loadData(file_path, tensor_shape);
+    createIndices();
+}
+
+// Load data from a CSV file
+void DataLoader::loadData(const std::string& file_path, const std::vector<size_t>& tensor_shape) {
+    std::ifstream file(file_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open file: " + file_path);
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream line_stream(line);
+        std::vector<float> values;
+        std::string cell;
+
+        while (std::getline(line_stream, cell, ',')) {
+            values.push_back(std::stof(cell)); // Convert string to float
+        }
+
+        size_t total_size = 1;
+        for (size_t dim : tensor_shape) {
+            total_size *= dim;
+        }
+
+        if (values.size() != total_size) {
+            throw std::invalid_argument("Data size in row does not match the specified tensor shape.");
+        }
+
+        // Create a Tensor and add it to the dataset
+        data.push_back(Tensor::from_values(tensor_shape, values));
+    }
+
+    file.close();
+}
+
+// Initialize indices for shuffling
+void DataLoader::createIndices() {
+    indices.resize(data.size());
+    for (size_t i = 0; i < data.size(); ++i) {
+        indices[i] = i;
+    }
+}
+
+// Shuffle the indices
+void DataLoader::shuffleIndices() {
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::shuffle(indices.begin(), indices.end(), generator);
+}
+
+// Fetch the next batch of data
+std::vector<Tensor> DataLoader::getNextBatch(size_t start_index) {
+    std::vector<Tensor> batch;
+    size_t end_index = std::min(start_index + batch_size, data.size());
+    for (size_t i = start_index; i < end_index; ++i) {
+        batch.push_back(data[indices[i]]);
+    }
+    return batch;
+}
+
+// Iterate through the dataset
+void DataLoader::iterateDataset() {
+    if (shuffle) {
+        shuffleIndices();
+    }
+
+    size_t total_batches = (data.size() + batch_size - 1) / batch_size;
+    for (size_t i = 0; i < total_batches; ++i) {
+        auto batch = getNextBatch(i * batch_size);
+
+        // Example: Process the batch (replace with actual logic)
+        std::cout << "Batch " << i + 1 << ":\n";
+        for (const auto& tensor : batch) {
+            tensor.print(); // Assuming Tensor::print() prints the tensor data
+            std::cout << "\n";
+        }
+    }
+}
