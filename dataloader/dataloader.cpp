@@ -1,4 +1,4 @@
-//dataloader functions
+// dataloader functions
 #include "dataloader.h"
 #include <fstream>
 #include <sstream>
@@ -54,11 +54,23 @@ void DataLoader::createIndices() {
     }
 }
 
-// Shuffle the indices
+// Shuffle the indices with debug information
 void DataLoader::shuffleIndices() {
+    std::cout << "Indices before shuffle: ";
+    for (size_t i : indices) {
+        std::cout << i << " ";
+    }
+    std::cout << "\n";
+
     std::random_device rd;
     std::mt19937 generator(rd());
     std::shuffle(indices.begin(), indices.end(), generator);
+
+    std::cout << "Indices after shuffle: ";
+    for (size_t i : indices) {
+        std::cout << i << " ";
+    }
+    std::cout << "\n";
 }
 
 // Fetch the next batch of data
@@ -71,18 +83,20 @@ std::vector<Tensor> DataLoader::getNextBatch(size_t start_index) {
     return batch;
 }
 
-// Iterate through the dataset
+// Iterate through the dataset with debug information
 void DataLoader::iterateDataset() {
     if (shuffle) {
+        std::cout << "Shuffling the dataset...\n";
         shuffleIndices();
+    } else {
+        std::cout << "Skipping shuffle as it is disabled.\n";
     }
 
     size_t total_batches = (data.size() + batch_size - 1) / batch_size;
     for (size_t i = 0; i < total_batches; ++i) {
         auto batch = getNextBatch(i * batch_size);
 
-        // Example: Process the batch (replace with actual logic)
-        std::cout << "Batch " << i + 1 << ":\n";
+        std::cout << "Batch " << i + 1 << " (size: " << batch.size() << "):\n";
         for (const auto& tensor : batch) {
             tensor.print(); // Assuming Tensor::print() prints the tensor data
             std::cout << "\n";
