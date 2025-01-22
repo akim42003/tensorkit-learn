@@ -30,25 +30,19 @@ bool areBatchesEqual(const std::vector<Tensor>& batch1, const std::vector<Tensor
             return false;
         }
 
-        // Compare data
+        // Compare elements (multi-dimensional indices logic here)
         const auto& shape = batch1[i].getShape();
         size_t total_size = 1;
         for (size_t dim : shape) {
             total_size *= dim;
         }
 
-        // Convert flat index to multi-dimensional index
-        std::vector<size_t> strides(shape.size(), 1);
-        for (int d = shape.size() - 2; d >= 0; --d) {
-            strides[d] = strides[d + 1] * shape[d + 1];
-        }
-
         for (size_t j = 0; j < total_size; ++j) {
             std::vector<size_t> multi_index(shape.size());
             size_t remaining = j;
             for (size_t d = 0; d < shape.size(); ++d) {
-                multi_index[d] = remaining / strides[d];
-                remaining %= strides[d];
+                multi_index[d] = remaining % shape[d];
+                remaining /= shape[d];
             }
 
             if (batch1[i].operator()(multi_index) != batch2[i].operator()(multi_index)) {
@@ -59,6 +53,7 @@ bool areBatchesEqual(const std::vector<Tensor>& batch1, const std::vector<Tensor
 
     return true;
 }
+
 
 // Test function for DataLoader
 void testDataLoader() {
@@ -71,44 +66,41 @@ void testDataLoader() {
         std::cout << "Initializing DataLoader...\n";
         DataLoader loader(test_file, {3, 4}, 2, true); // 3x4 tensors, batch size of 2, shuffle enabled
 
-        // Debug: Print indices before and after shuffle
-        std::cout << "Indices before shuffle:\n";
-        loader.iterateDataset(); // Prints initial order and data
+        // Step 3: Test iterateDataset (prints batches)
+        std::cout << "Iterating through dataset:\n";
+        loader.iterateDataset();
 
+        // Step 4: Fetch batches before shuffling
+        std::cout << "\nFetching batches before shuffle:\n";
+        auto batch1_before = loader.getNextBatch(0);
+        auto batch2_before = loader.getNextBatch(2);
+
+        // Step 5: Shuffle dataset by reinitializing or iterating again
         std::cout << "\nVerifying shuffle...\n";
-        loader.iterateDataset(); // Prints shuffled order and data
+        loader.iterateDataset(); // Forces shuffle internally
 
-        // Step 3: Test specific batches
-        std::cout << "\nFetching specific batches:\n";
-        auto batch1 = loader.getNextBatch(0);
-        std::cout << "Batch 1:\n";
-        for (const auto& tensor : batch1) {
-            tensor.print();
-            std::cout << "\n";
-        }
+        // Step 6: Fetch batches after shuffling
+        auto batch1_after = loader.getNextBatch(0);
+        auto batch2_after = loader.getNextBatch(2);
 
-        auto batch2 = loader.getNextBatch(2);
-        std::cout << "Batch 2:\n";
-        for (const auto& tensor : batch2) {
-            tensor.print();
-            std::cout << "\n";
-        }
+        // Step 7: Compare batches before and after shuffle
+        bool is_shuffled = !(areBatchesEqual(batch1_before, batch1_after) &&
+                             areBatchesEqual(batch2_before, batch2_after));
 
-        // Step 4: Verify shuffle manually
-        auto shuffled_batch1 = loader.getNextBatch(0);
-        if (!areBatchesEqual(batch1, shuffled_batch1)) {
+        if (is_shuffled) {
             std::cout << "Shuffling verified: Data order changed.\n";
         } else {
-            std::cout << "Shuffle disabled or data not shuffled.\n";
+            std::cout << "Shuffle failed: Data order did not change.\n";
         }
 
     } catch (const std::exception& e) {
         std::cerr << "Test failed: " << e.what() << "\n";
     }
 
-    // Step 5: Cleanup
+    // Step 8: Cleanup
     std::remove(test_file.c_str());
 }
+
 
 int main() {
     testDataLoader();
