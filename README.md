@@ -6,10 +6,11 @@ A tensor based machine library for educational and personal purposes
 - loss functions written in python (may rewrite in c++)
 - link functions written in c++
 - bindings for tensor and link function classes 
+- basics for dataloader finished
+- glm working with synthetic data
 
 ### Working on 
-- glm method in python first
-- testing glm class with synthetic data
+- decision tree? 
 - rewriting loss functions in c++
-- data loader to read in dataset (csv format for example)
+
 
