@@ -53,15 +53,15 @@ class GLM:
             predictions = predictions.clamp(epsilon, 1 - epsilon)
             # Compute gradients
             gradients = self.loss_function.backward(predictions, y)
-            gradients.print()
+            # gradients.print()
 
             # Gradient clipping for stability
             gradients = gradients.clamp(-1.0, 1.0)
-            gradients.print()
+            # gradients.print()
 
             # Compute updates
             updates = X.Tp().matmul(gradients)  # Shape: [num_features, 1]
-            updates.print()
+            # updates.print()
             # Create a ones matrix, scaled by the learning rate, matching the shape of updates
             ones_matrix = ts.Tensor.from_values(updates.getShape(), [learning_rate] * (updates.getShape()[0] * updates.getShape()[1]))
             updates = updates.tplus(ones_matrix)
