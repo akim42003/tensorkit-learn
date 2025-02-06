@@ -65,5 +65,6 @@
         "unordered_set": "cpp",
         "valarray": "cpp",
         "fstream": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "/Users/alex/tensorkit-learn/dataloader"
 }

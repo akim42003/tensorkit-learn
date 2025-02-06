@@ -7,7 +7,7 @@
 #include "/Users/alex/tensorkit-learn/tensor_cpp/tensor.h" // Include your Tensor class header
 
 class DataLoader {
-private:
+private: 
     std::vector<Tensor> data;      // Store data as Tensors
     size_t batch_size;             // Batch size for loading
     bool shuffle;                  // Whether to shuffle the data

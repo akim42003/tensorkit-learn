@@ -1,6 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "link_functions.h"
+#include "/Users/alex/tensorkit-learn/ml_models/link_functions/link_functions.h"
 
 namespace py = pybind11;
 
