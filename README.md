@@ -8,9 +8,10 @@ A tensor based machine library for educational and personal purposes
 - bindings for tensor and link function classes 
 - basics for dataloader finished
 - glm working with synthetic data
+- SVM works for sythetic data (although it needs improvement for non linear kernels)
 
 ### Working on 
-- decision tree? 
-- rewriting loss functions in c++
+- kernel function class
+- basic MLP and activation function classes
 
 
