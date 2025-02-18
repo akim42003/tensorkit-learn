@@ -9,9 +9,10 @@ A tensor based machine library for educational and personal purposes
 - basics for dataloader finished
 - glm working with synthetic data
 - SVM works for sythetic data (although it needs improvement for non linear kernels)
+- SVM kernel functions (dual objective)
 
 ### Working on 
-- kernel function class
 - basic MLP and activation function classes
+- decision tree and or gradient boosting? 
 
 
