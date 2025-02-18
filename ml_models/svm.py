@@ -1,137 +1,123 @@
 import tensor_slow as ts
-
-# Helper functions:
-
-def generate_indices(shape):
-    """Recursively generate all index lists for a tensor of the given shape."""
-    if not shape:
-        return [[]]
-    result = []
-    for i in range(shape[0]):
-        for sub in generate_indices(shape[1:]):
-            result.append([i] + sub)
-    return result
-
-def scalar_multiply(t, scalar):
-    """
-    Multiply every element of tensor 't' by the given scalar.
-    Returns a new Tensor.
-    """
-    shape = t.getShape()
-    indices = generate_indices(shape)
-    new_values = []
-    for idx in indices:
-        new_values.append(t[list(idx)] * scalar)
-    return ts.Tensor.from_values(shape, new_values)
-
-def elementwise_multiply(t1, t2):
-    """
-    Multiply two tensors elementwise.
-    Both tensors must have the same shape.
-    """
-    shape = t1.getShape()
-    if shape != t2.getShape():
-        raise ValueError("Shapes must match for elementwise multiplication")
-    indices = generate_indices(shape)
-    new_values = []
-    for idx in indices:
-        new_values.append(t1[list(idx)] * t2[list(idx)])
-    return ts.Tensor.from_values(shape, new_values)
-
-def tensor_dot(t1, t2):
-    """
-    Compute the dot product between two tensors of the same shape
-    by summing the products of corresponding elements.
-    Returns a scalar.
-    """
-    shape = t1.getShape()
-    if shape != t2.getShape():
-        raise ValueError("Shapes must match for tensor_dot")
-    indices = generate_indices(shape)
-    total = 0.0
-    for idx in indices:
-        total += t1[list(idx)] * t2[list(idx)]
-    return total
+import math
+from kernel_func import KernelFunctions  # our KernelFunctions class from before
 
 class SVM:
-    def __init__(self, learning_rate=0.0001, lambda_reg=0.01, epochs=1000):
-        self.lr = learning_rate
-        self.lambda_reg = lambda_reg
+    def __init__(self, C=1.0, kernel="linear", degree=3, coef0=1, gamma=0.1, epochs=1000, learning_rate=0.001):
+        """
+        C: Regularization parameter (upper bound on alpha)
+        kernel: Kernel type ("linear", "polynomial", "rbf")
+        degree, coef0, gamma: Kernel parameters for polynomial/RBF kernels
+        epochs, learning_rate: Optimization parameters for updating alpha
+        """
+        self.C = C
+        self.kernel_type = kernel
+        self.degree = degree
+        self.coef0 = coef0
+        self.gamma = gamma
         self.epochs = epochs
-        self.weights = None  # Will be initialized in fit()
-        self.bias = 0        # Scalar bias
+        self.lr = learning_rate
 
-    def compute_loss(self, X, y):
+        # These will be set during training:
+        self.alpha = None  # Lagrange multipliers (a Tensor of shape [n_samples, 1])
+        self.bias = 0
+        self.X_train = None  # Keep a copy of training inputs
+        self.y_train = None  # and training labels
+
+        # Select kernel function from KernelFunctions
+        if kernel == "linear":
+            self.kernel_func = KernelFunctions.linear
+        elif kernel == "polynomial":
+            self.kernel_func = lambda X, Y: KernelFunctions.polynomial(X, Y, degree, coef0)
+        elif kernel == "rbf":
+            self.kernel_func = lambda X, Y: KernelFunctions.rbf(X, Y, gamma)
+        else:
+            raise ValueError("Unsupported kernel type")
+
+    def compute_kernel_matrix(self, X):
         """
-        Computes total loss = sum_i max(0, 1 - y_i * (x_i · w + b))
-        + (lambda/2)*||w||^2.
+        Computes the kernel matrix between the training data and X.
+        If X is the training set, returns K of shape [n_samples, n_samples].
         """
-        n_samples = X.getShape()[0]
-        # Create bias tensor of shape [n_samples, 1]
-        bias_tensor = ts.Tensor.from_values([n_samples, 1], [self.bias] * n_samples)
-        pred = X.matmul(self.weights).tplus(bias_tensor)
-        # Compute elementwise product: y * pred.
-        prod = elementwise_multiply(y, pred)
-        # Create a ones tensor for each sample: shape [n_samples, 1]
-        ones_tensor = ts.Tensor.from_values([n_samples, 1], [1.0] * n_samples)
-        # Compute margins: 1 - (y * pred)
-        margins = ones_tensor.tminus(prod)
-        hinge_loss = margins.clamp(0, float("inf"))
-        total_hinge = 0.0
-        for idx in generate_indices(hinge_loss.getShape()):
-            total_hinge += hinge_loss[list(idx)]
-        reg_loss = tensor_dot(self.weights, self.weights) * (self.lambda_reg / 2)
-        return total_hinge + reg_loss
+        return self.kernel_func(self.X_train, X)
+
+    def compute_objective(self):
+        """
+        Computes the dual objective:
+        We'll assume that our Tensor class can work in a scalar context via our helper functions.
+        """
+        n_samples = self.y_train.getShape()[0]
+        # Sum of alphas:
+        sum_alpha = 0.0
+        for i in range(n_samples):
+            sum_alpha += self.alpha[i, 0]
+        # Double sum term:
+        double_sum = 0.0
+        # Precompute kernel matrix K_train
+        K_train = self.compute_kernel_matrix(self.X_train)
+        for i in range(n_samples):
+            for j in range(n_samples):
+                double_sum += self.alpha[i, 0] * self.alpha[j, 0] * self.y_train[i, 0] * self.y_train[j, 0] * K_train[i, j]
+        return sum_alpha - 0.5 * double_sum
 
     def fit(self, X, y):
         """
-        Trains the SVM using gradient descent.
-        For each sample, if y * (x·w + b) >= 1, the gradient is lambda * w;
-        otherwise, it is lambda * w - y * x.
+        Trains the kernel SVM using a simple gradient ascent on the dual objective.
+        (For a complete implementation, one must also enforce the equality constraint. Here we use a simple approach for learning.)
         """
-        n_samples, n_features = X.getShape()
-        self.weights = ts.Tensor.zeros([n_features, 1])  # Initialize weights as zeros
-
+        n_samples, _ = X.getShape()
+        # Save training data for later use in prediction.
+        self.X_train = X
+        self.y_train = y
+        # Initialize α to zeros (as a Tensor of shape [n_samples, 1])
+        self.alpha = ts.Tensor.zeros([n_samples, 1])
+        # Simple gradient ascent loop
         for epoch in range(self.epochs):
+            # For each training example, compute gradient for α_i:
+            # Gradient_i = 1 - ∑_j α_j y_i y_j K(x_i,x_j)
+            K_train = self.compute_kernel_matrix(X)  # shape: [n_samples, n_samples]
             for i in range(n_samples):
-                # Extract row i as tensor of shape [1, n_features]
-                xi_values = [X[i, j] for j in range(n_features)]
-                xi = ts.Tensor.from_values([1, n_features], xi_values)
-                yi = y[i, 0]  # Extract scalar label
-
-                # Create bias tensor for this sample
-                bias_tensor = ts.Tensor.from_values([1, 1], [self.bias])
-                pred = xi.matmul(self.weights).tplus(bias_tensor)
-                # Compute margin: y_i * (x_i · w + b)
-                margin_tensor = scalar_multiply(pred, yi)
-                margin = margin_tensor[0, 0]  # Extract scalar
-
-                if margin >= 1:
-                    # Correct classification: gradient = lambda * w
-                    self.weights = self.weights.tminus(scalar_multiply(self.weights, self.lr * self.lambda_reg))
-                else:
-                    # Misclassified: gradient = lambda * w - y_i * x_i
-                    # We need to update weights: subtract lr * gradient.
-                    # To get y_i * x_i with shape [n_features, 1], transpose xi.
-                    update_term = scalar_multiply(xi.Tp(), yi * self.lr)
-                    self.weights = self.weights.tminus(
-                        scalar_multiply(self.weights, self.lr * self.lambda_reg).tminus(update_term)
-                    )
-                    self.bias -= self.lr * yi
-
+                grad = 1.0
+                for j in range(n_samples):
+                    grad -= self.alpha[j, 0] * y[i, 0] * y[j, 0] * K_train[i, j]
+                # Update α_i using gradient ascent (and clip to [0, C])
+                new_alpha = self.alpha[i, 0] + self.lr * grad
+                if new_alpha < 0:
+                    new_alpha = 0
+                elif new_alpha > self.C:
+                    new_alpha = self.C
+                self.alpha[i, 0] = new_alpha
+            # (Optional) Update bias using KKT conditions
+            # For simplicity, we set bias to 0 here.
+            self.bias = 0
             if epoch % 100 == 0:
-                loss = self.compute_loss(X, y)
-                print(f"Epoch {epoch}: Loss = {loss}")
-
-    def predict(self, X):
-        """Predicts class labels (-1 or 1) for each sample in X."""
-        n_samples = X.getShape()[0]
-        bias_tensor = ts.Tensor.from_values([n_samples, 1], [self.bias] * n_samples)
-        pred = X.matmul(self.weights).tplus(bias_tensor)
-        return pred.clamp(-1, 1)
+                obj = self.compute_objective()
+                print(f"Epoch {epoch}: Dual Objective = {obj}")
 
     def decision_function(self, X):
-        """Computes the raw margin scores for X."""
-        n_samples = X.getShape()[0]
-        bias_tensor = ts.Tensor.from_values([n_samples, 1], [self.bias] * n_samples)
-        return X.matmul(self.weights).tplus(bias_tensor)
+        """
+        Computes the decision function for each input sample in X:
+        """
+        K_test = self.kernel_func(self.X_train, X)  # shape: [n_train, n_test]
+        n_train, n_test = K_test.getShape()
+        # Compute the sum for each test sample:
+        f_vals = [0.0] * n_test
+        for j in range(n_test):
+            total = 0.0
+            for i in range(n_train):
+                total += self.alpha[i, 0] * self.y_train[i, 0] * K_test[i, j]
+            f_vals[j] = total + self.bias
+        # Return f_vals as a Tensor of shape [n_test, 1]
+        return ts.Tensor.from_values([n_test, 1], f_vals)
+
+    def predict(self, X):
+        """
+        Predicts class labels (-1 or 1) based on the decision function.
+        """
+        f = self.decision_function(X)
+        n_test, _ = f.getShape()
+        predictions = []
+        for i in range(n_test):
+            # Using a simple threshold at 0:
+            predictions.append(1 if f[i, 0] >= 0 else -1)
+        return ts.Tensor.from_values([n_test, 1], predictions)
