@@ -21,7 +21,7 @@ The project follows a layered architecture:
 ```
 ┌─────────────────────────────────────────┐
 │         Python ML Models                │
-│      (GLM, SVM, Optimizers)            │
+│      (GLM, SVM, Optimizers)             │
 ├─────────────────────────────────────────┤
 │      Python Bindings (pybind11)         │
 │         tensor_slow module              │
@@ -173,7 +173,7 @@ classifier = create_classifier(
 # Method 2: Manual network construction
 mlp = MLP()
 mlp.add_layer(4, 8, activation='relu')
-mlp.add_layer(8, 4, activation='relu') 
+mlp.add_layer(8, 4, activation='relu')
 mlp.add_layer(4, 1, activation='sigmoid')
 mlp.loss_function = Binary_CELoss()
 
@@ -215,7 +215,7 @@ class CustomLoss(Loss):
     def forward(self, y_true, y_pred):
         # Implement forward pass
         return loss_tensor
-    
+
     def backward(self, y_true, y_pred):
         # Implement gradient computation
         return gradient_tensor
