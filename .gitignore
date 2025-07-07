@@ -26,6 +26,20 @@ Makefile
 
 # IDE-specific files
 .vscode/
+.idea/
+*.swp
+*.swo
 
 # Compiled binaries
-tensor
+tensor_test
+link
+dl
+a.out
+loss_functions
+
+# Python egg info
+*.egg-info/
+
+# OS-specific files
+Thumbs.db
+.directory
