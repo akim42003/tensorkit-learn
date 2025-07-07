@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <random>
+#include <algorithm>
 
 // Constructor
 DataLoader::DataLoader(const std::string& file_path, const std::vector<size_t>& tensor_shape, size_t batch_size, bool shuffle)

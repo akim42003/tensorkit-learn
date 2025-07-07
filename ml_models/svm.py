@@ -74,7 +74,6 @@ class SVM:
         # Simple gradient ascent loop
         for epoch in range(self.epochs):
             # For each training example, compute gradient for α_i:
-            # Gradient_i = 1 - ∑_j α_j y_i y_j K(x_i,x_j)
             K_train = self.compute_kernel_matrix(X)  # shape: [n_samples, n_samples]
             for i in range(n_samples):
                 grad = 1.0

@@ -4,7 +4,7 @@
 
 #include <vector>
 #include <string>
-#include "/Users/alex/tensorkit-learn/tensor_cpp/tensor.h" // Include your Tensor class header
+#include "../tensor_cpp/tensor.h" // Include your Tensor class header
 
 class DataLoader {
 private: 

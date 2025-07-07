@@ -1,7 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "/Users/alex/tensorkit-learn/tensor_cpp/tensor.h"
-#include "/Users/alex/tensorkit-learn/dataloader/dataloader.h"
+#include "../tensor_cpp/tensor.h"
+#include "../dataloader/dataloader.h"
 
 namespace py = pybind11;
 

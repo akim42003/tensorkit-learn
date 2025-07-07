@@ -1,7 +1,7 @@
 #ifndef LINK_FUNCTIONS_H
 #define LINK_FUNCTIONS_H
 
-#include "/Users/alex/tensorkit-learn/tensor_cpp/tensor.h"
+#include "../../tensor_cpp/tensor.h"
 
 class LinkFunction {
 public:
