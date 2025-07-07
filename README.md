@@ -21,13 +21,15 @@ The project follows a layered architecture:
 ```
 ┌─────────────────────────────────────────┐
 │         Python ML Models                │
-│      (GLM, SVM, Optimizers)             │
+│    (GLM, SVM, MLP, Optimizers)          │
 ├─────────────────────────────────────────┤
 │      Python Bindings (pybind11)         │
-│         tensor_slow module              │
+│   (Tensor, DataLoader, Link Functions,  │
+│           MLP Bindings)                 │
 ├─────────────────────────────────────────┤
 │         C++ Core Libraries              │
-│  (Tensor, Link Functions, DataLoader)   │
+│ (Tensor, Link Functions, DataLoader,    │
+│            MLP Network)                 │
 └─────────────────────────────────────────┘
 ```
 
@@ -37,22 +39,42 @@ The project follows a layered architecture:
 tensorkit-learn/
 ├── tensor_cpp/             # Core C++ tensor implementation
 │   ├── tensor.h           # Tensor class definition
-│   └── tensor.cpp         # Tensor operations implementation
+│   ├── tensor.cpp         # Tensor operations implementation
+│   └── CMakeLists.txt     # Build configuration for tensor library
 ├── bindings/              # Python-C++ bindings
-│   └── bindings.cpp       # pybind11 module definition
+│   ├── bindings.cpp       # Main tensor bindings
+│   ├── dl_bindings.cpp    # DataLoader bindings
+│   ├── lf_bindings.cpp    # Link function bindings
+│   ├── mlp_bindings.cpp   # MLP bindings
+│   └── CMakeLists.txt     # Build configuration for bindings
 ├── ml_models/             # Machine learning algorithms
 │   ├── glm.py            # Generalized Linear Models
 │   ├── svm.py            # Support Vector Machine
+│   ├── mlp.py            # Multi-Layer Perceptron
 │   ├── kernel_func.py    # Kernel functions for SVM
+│   ├── glm_test.py       # GLM usage examples
+│   ├── svm_test.py       # SVM usage examples
+│   ├── mlp_test.py       # MLP usage examples
 │   ├── link_functions/   # C++ link function implementations
+│   │   ├── link_functions.h    # Link function headers
+│   │   ├── link_functions.cpp  # Link function implementations
+│   │   └── CMakeLists.txt      # Build configuration
+│   ├── mlp/              # C++ MLP implementation
+│   │   ├── mlp.h         # MLP class definition
+│   │   └── mlp.cpp       # MLP implementation
 │   └── optimizers/       # Loss functions and optimizers
+│       └── loss_functions.py  # Python loss function implementations
 ├── dataloader/            # Data loading utilities
 │   ├── dataloader.h      # C++ dataloader interface
-│   └── dataloader.cpp    # CSV loading implementation
+│   ├── dataloader.cpp    # CSV loading implementation
+│   └── CMakeLists.txt    # Build configuration for dataloader
 ├── tests/                 # Test files and examples
-│   ├── tensor_test.py    # Tensor operations tests
-│   ├── glm_test.py       # GLM usage examples
-│   └── svm_test.py       # SVM usage examples
+│   ├── tensor_test.py    # Python tensor operations tests
+│   ├── tensor_test.cpp   # C++ tensor operations tests
+│   ├── lf_test.py        # Link function tests
+│   ├── ce_test.py        # Cross-entropy loss tests
+│   ├── mse_test.py       # MSE loss tests
+│   └── dl_test.cpp       # DataLoader tests
 └── build/                 # Build artifacts (generated)
 ```
 
@@ -275,22 +297,26 @@ Run the test suite to verify installation:
 python tests/tensor_test.py
 
 # Test GLM
-python tests/glm_test.py
+python ml_models/glm_test.py
 
 # Test SVM
-python tests/svm_test.py
+python ml_models/svm_test.py
 
 # Test MLP
-python tests/mlp_test.py
+python ml_models/mlp_test.py
+
+# Test link functions
+python tests/lf_test.py
+
+# Test loss functions
+python tests/ce_test.py  # Cross-entropy loss
+python tests/mse_test.py # MSE loss
 ```
 
 ## Contributing
 
 This is an educational project aimed at understanding ML fundamentals. Contributions that enhance clarity, add educational value, or implement new algorithms from scratch are welcome.
 
-## License
-
-[Add your license here]
 
 ## Acknowledgments
 
