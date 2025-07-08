@@ -30,6 +30,8 @@ public:
     // Arithmetic Operations
     Tensor tplus(const Tensor& other);
     Tensor tminus(const Tensor& other) const;
+    Tensor elementwise_multiply(const Tensor& other) const;
+    Tensor scalar_multiply(float scalar) const;
 
     // Dot Product
     float dot(Tensor& other) const;

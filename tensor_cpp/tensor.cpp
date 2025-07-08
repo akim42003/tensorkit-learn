@@ -87,6 +87,27 @@ Tensor Tensor::tminus(const Tensor& other) const {
     return result;
 }
 
+// Element-wise multiplication
+Tensor Tensor::elementwise_multiply(const Tensor& other) const {
+    if (shape != other.shape) {
+        throw std::invalid_argument("Shapes must match for element-wise multiplication");
+    }
+    Tensor result(shape);
+    for (size_t i = 0; i < data.size(); i++) {
+        result.data[i] = data[i] * other.data[i];
+    }
+    return result;
+}
+
+// Scalar multiplication
+Tensor Tensor::scalar_multiply(float scalar) const {
+    Tensor result(shape);
+    for (size_t i = 0; i < data.size(); i++) {
+        result.data[i] = data[i] * scalar;
+    }
+    return result;
+}
+
 // Element wise operations: Logarithm
 Tensor Tensor::log() const {
     Tensor result(shape);
@@ -164,7 +185,7 @@ float Tensor::dot(Tensor& other) const {
     return result;
 }
 
-// Matrix multiplication
+// Matrix multiplication (lowkey deprecated)
 Tensor Tensor::matmul(const Tensor& other) const {
     if (shape.size() != 2 || other.shape.size() != 2) {
         throw std::invalid_argument("Matrix multiplication is defined for 2D tensors only");

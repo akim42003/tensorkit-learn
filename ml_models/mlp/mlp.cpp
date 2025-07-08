@@ -2,51 +2,6 @@
 #include <algorithm>
 #include <iostream>
 
-// Helper functions for element-wise operations
-Tensor elementwise_multiply(const Tensor& a, const Tensor& b) {
-    // Create output tensor
-    Tensor result = Tensor::zeros(a.getShape());
-    
-    // Get total size
-    size_t total_size = 1;
-    for (size_t dim : a.getShape()) {
-        total_size *= dim;
-    }
-    
-    // Perform element-wise multiplication
-    for (size_t i = 0; i < total_size; i++) {
-        std::vector<size_t> indices(a.getShape().size(), 0);
-        size_t idx = i;
-        for (int d = a.getShape().size() - 1; d >= 0; d--) {
-            indices[d] = idx % a.getShape()[d];
-            idx /= a.getShape()[d];
-        }
-        result(indices) = a(indices) * b(indices);
-    }
-    
-    return result;
-}
-
-Tensor scalar_multiply(const Tensor& a, float scalar) {
-    Tensor result = Tensor::zeros(a.getShape());
-    
-    size_t total_size = 1;
-    for (size_t dim : a.getShape()) {
-        total_size *= dim;
-    }
-    
-    for (size_t i = 0; i < total_size; i++) {
-        std::vector<size_t> indices(a.getShape().size(), 0);
-        size_t idx = i;
-        for (int d = a.getShape().size() - 1; d >= 0; d--) {
-            indices[d] = idx % a.getShape()[d];
-            idx /= a.getShape()[d];
-        }
-        result(indices) = a(indices) * scalar;
-    }
-    
-    return result;
-}
 
 Tensor add_bias(const Tensor& input, const Tensor& bias) {
     // input shape: [batch_size, features]
@@ -64,10 +19,6 @@ Tensor add_bias(const Tensor& input, const Tensor& bias) {
     return result;
 }
 
-// Helper function to create a tensor of ones
-Tensor ones_like(const Tensor& t) {
-    return Tensor::ones(t.getShape());
-}
 
 // ReLU implementation
 Tensor ReLU::forward(const Tensor& input) const {
@@ -97,7 +48,7 @@ Tensor ReLU::backward(const Tensor& input, const Tensor& grad_output) const {
     }
     
     Tensor mask = Tensor::from_values(shape, mask_data);
-    return elementwise_multiply(grad_output, mask);
+    return grad_output.elementwise_multiply(mask);
 }
 
 // Sigmoid implementation
@@ -105,24 +56,10 @@ Tensor Sigmoid::forward(const Tensor& input) const {
     // sigmoid(x) = 1 / (1 + exp(-x))
     // Clamp input to avoid overflow
     Tensor x_clamped = input.clamp(-500.0, 500.0);
-    Tensor ones = ones_like(input);
+    Tensor ones = Tensor::ones(input.getShape());
     
-    // Create -1 tensor for negation
-    Tensor neg_x_clamped = Tensor::zeros(x_clamped.getShape());
-    size_t total_size = 1;
-    for (size_t dim : x_clamped.getShape()) {
-        total_size *= dim;
-    }
-    
-    for (size_t i = 0; i < total_size; i++) {
-        std::vector<size_t> indices(x_clamped.getShape().size(), 0);
-        size_t idx = i;
-        for (int d = x_clamped.getShape().size() - 1; d >= 0; d--) {
-            indices[d] = idx % x_clamped.getShape()[d];
-            idx /= x_clamped.getShape()[d];
-        }
-        neg_x_clamped(indices) = -x_clamped(indices);
-    }
+    // Create -x using scalar multiplication
+    Tensor neg_x_clamped = x_clamped.scalar_multiply(-1.0);
     
     Tensor exp_neg_x = neg_x_clamped.exp();
     Tensor denominator = ones.tplus(exp_neg_x);
@@ -132,10 +69,10 @@ Tensor Sigmoid::forward(const Tensor& input) const {
 Tensor Sigmoid::backward(const Tensor& input, const Tensor& grad_output) const {
     // Derivative: sigmoid(x) * (1 - sigmoid(x))
     Tensor sigmoid_x = forward(input);
-    Tensor ones = ones_like(input);
+    Tensor ones = Tensor::ones(input.getShape());
     Tensor one_minus_sigmoid = ones.tminus(sigmoid_x);
-    Tensor derivative = elementwise_multiply(sigmoid_x, one_minus_sigmoid);
-    return elementwise_multiply(grad_output, derivative);
+    Tensor derivative = sigmoid_x.elementwise_multiply(one_minus_sigmoid);
+    return grad_output.elementwise_multiply(derivative);
 }
 
 // Tanh implementation
@@ -144,23 +81,8 @@ Tensor Tanh::forward(const Tensor& input) const {
     Tensor x_clamped = input.clamp(-500.0, 500.0);
     Tensor exp_x = x_clamped.exp();
     
-    // Create -x
-    Tensor neg_x_clamped = Tensor::zeros(x_clamped.getShape());
-    size_t total_size = 1;
-    for (size_t dim : x_clamped.getShape()) {
-        total_size *= dim;
-    }
-    
-    for (size_t i = 0; i < total_size; i++) {
-        std::vector<size_t> indices(x_clamped.getShape().size(), 0);
-        size_t idx = i;
-        for (int d = x_clamped.getShape().size() - 1; d >= 0; d--) {
-            indices[d] = idx % x_clamped.getShape()[d];
-            idx /= x_clamped.getShape()[d];
-        }
-        neg_x_clamped(indices) = -x_clamped(indices);
-    }
-    
+    // Create -x using scalar multiplication
+    Tensor neg_x_clamped = x_clamped.scalar_multiply(-1.0);
     Tensor exp_neg_x = neg_x_clamped.exp();
     
     Tensor numerator = exp_x.tminus(exp_neg_x);
@@ -171,10 +93,10 @@ Tensor Tanh::forward(const Tensor& input) const {
 Tensor Tanh::backward(const Tensor& input, const Tensor& grad_output) const {
     // Derivative: 1 - tanh(x)^2
     Tensor tanh_x = forward(input);
-    Tensor tanh_x_squared = elementwise_multiply(tanh_x, tanh_x);
-    Tensor ones = ones_like(input);
+    Tensor tanh_x_squared = tanh_x.elementwise_multiply(tanh_x);
+    Tensor ones = Tensor::ones(input.getShape());
     Tensor derivative = ones.tminus(tanh_x_squared);
-    return elementwise_multiply(grad_output, derivative);
+    return grad_output.elementwise_multiply(derivative);
 }
 
 // Linear implementation
@@ -262,8 +184,8 @@ Tensor Layer::backward(const Tensor& grad_output, double learning_rate) {
     Tensor grad_input = grad_activation.matmul(weights.Tp());
     
     // Update weights and bias
-    weights = weights.tminus(scalar_multiply(grad_weights, learning_rate));
-    bias = bias.tminus(scalar_multiply(grad_bias, learning_rate));
+    weights = weights.tminus(grad_weights.scalar_multiply(learning_rate));
+    bias = bias.tminus(grad_bias.scalar_multiply(learning_rate));
     
     return grad_input;
 }

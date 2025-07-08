@@ -44,7 +44,6 @@ class SVM:
     def compute_objective(self):
         """
         Computes the dual objective:
-        We'll assume that our Tensor class can work in a scalar context via our helper functions.
         """
         n_samples = self.y_train.getShape()[0]
         # Sum of alphas:
