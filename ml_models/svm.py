@@ -68,11 +68,11 @@ class SVM:
         # Save training data for later use in prediction.
         self.X_train = X
         self.y_train = y
-        # Initialize α to zeros (as a Tensor of shape [n_samples, 1])
+
         self.alpha = ts.Tensor.zeros([n_samples, 1])
         # Simple gradient ascent loop
         for epoch in range(self.epochs):
-            # For each training example, compute gradient for α_i:
+
             K_train = self.compute_kernel_matrix(X)  # shape: [n_samples, n_samples]
             for i in range(n_samples):
                 grad = 1.0
