@@ -9,7 +9,11 @@ tensorkit-learn is a hybrid C++/Python machine learning framework that demonstra
 ### Key Features
 
 - **Custom Tensor Library**: N-dimensional array operations implemented in C++ with full broadcasting support
-- **Machine Learning Models**: MLP (Multilayer Perceptron), GLM (Generalized Linear Models) and SVM (Support Vector Machines) with kernel methods
+- **Machine Learning Models**:
+  - Generalized Linear Models (GLM) - Classification & Regression
+  - Multi-Layer Perceptrons (MLP) - Classification & Regression
+  - Support Vector Machines (SVM) - Multiple kernel support
+- **Data Loading**: Robust CSV data loader with batching and shuffling
 - **Modular Architecture**: Separate components for tensors, optimizers, loss functions, and models
 - **Python Bindings**: Seamless integration between C++ performance and Python flexibility
 
@@ -121,7 +125,20 @@ c = tensor_slow.Tensor.from_values([[1, 2], [3, 4]], [2, 2])
 result = a + b  # Element-wise addition
 matmul_result = b.matmul(a)  # Matrix multiplication
 ```
+### Data Loading from CSV
 
+```python
+import dataloader
+
+# Load CSV data (no headers, numeric data only)
+dl = dataloader.DataLoader("data.csv", [4], batch_size=32, shuffle=True)
+
+# Iterate through dataset
+dl.iterate_dataset()
+
+# Get specific batch
+batch = dl.get_next_batch(0)
+```
 ### Generalized Linear Models (GLM)
 
 ```python
@@ -243,16 +260,16 @@ predictions = regressor.predict(X_test)
 
 ## Development Status
 
-### Completed
-- ✅ Core tensor operations in C++
-- ✅ Python bindings for tensor library
-- ✅ Generalized Linear Models (GLM)
-- ✅ Support Vector Machines with kernel methods
-- ✅ Loss functions (BCE, MSE)
-- ✅ Link functions for GLM
-- ✅ Basic data loader for CSV files
-- ✅ Multi-layer Perceptron (MLP) with C++ implementation
-- ✅ Activation functions (ReLU, Sigmoid, Tanh, Linear)
+### Completed ✅
+- Core tensor operations in C++
+- Python bindings for all components
+- Generalized Linear Models (GLM)
+- Multi-Layer Perceptrons (MLP) with C++ backend
+- Support Vector Machines with kernel methods
+- CSV data loader with batching/shuffling
+- Comprehensive test suite with performance evaluation
+- Loss functions (BCE, MSE) and link functions
+- Activation functions (ReLU, Sigmoid, Tanh, Linear)
 
 # Future Work
 - Convolutional operations
@@ -264,25 +281,54 @@ predictions = regressor.predict(X_test)
 
 Run the test suite to verify installation:
 
+### Quick Test
 ```bash
-# Test tensor operations
-python tests/tensor_test.py
+# Run complete test suite with CSV data
+python comprehensive_ml_test.py
+```
 
-# Test GLM
+### Individual Component Tests
+```bash
+# Test individual models
 python ml_models/glm_test.py
-
-# Test SVM
+python ml_models/mlp_test.py
 python ml_models/svm_test.py
 
-# Test MLP
-python ml_models/mlp_test.py
-
-# Test link functions
+# Test core components
+python tests/tensor_test.py
 python tests/lf_test.py
+python tests/mse_test.py
+python tests/ce_test.py
+```
 
-# Test loss functions
-python tests/ce_test.py  # Cross-entropy loss
-python tests/mse_test.py # MSE loss
+### Test Coverage
+
+The comprehensive test suite includes:
+- ✅ **DataLoader**: CSV loading, batching, shuffling functionality
+- ✅ **GLM**: Classification (LogitLink) and regression (IdentityLink)
+- ✅ **MLP**: Classification and regression with multi-layer networks
+- ✅ **SVM**: Linear, polynomial, and RBF kernel classification
+- ✅ **Performance**: Accuracy and MSE evaluation across models
+
+### Test Data
+
+Sample CSV datasets included:
+- `test_data_classification.csv` - 16 samples, 3 features, binary classification
+- `test_data_regression.csv` - 16 samples, 2 features, continuous regression
+- `test_data_no_header.csv` - Headerless CSV for direct dataloader testing
+
+## CSV Data Format
+
+The dataloader expects CSV files with:
+- Numeric data only (no headers)
+- Comma-separated values
+- Consistent number of columns per row
+
+Example CSV format:
+```csv
+0.1,0.2,0.3,0
+0.3,-0.1,0.5,0
+1.9,2.1,1.8,1
 ```
 
 ## Acknowledgments
