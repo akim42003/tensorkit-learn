@@ -62,9 +62,8 @@ class GLM:
             # Compute updates
             updates = X.Tp().matmul(gradients)  # Shape: [num_features, 1]
             # updates.print()
-            # Create a ones matrix, scaled by the learning rate, matching the shape of updates
-            ones_matrix = ts.Tensor.from_values(updates.getShape(), [learning_rate] * (updates.getShape()[0] * updates.getShape()[1]))
-            updates = updates.tplus(ones_matrix)
+            # Scale updates by learning rate
+            updates = updates.scalar_multiply(learning_rate)
 
             # Update coefficients
             self.coefficients = self.coefficients.tminus(updates)

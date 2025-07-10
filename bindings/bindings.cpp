@@ -40,6 +40,8 @@ PYBIND11_MODULE(tensor_slow, m) {
         // Add other overloads as needed
         .def("tplus", &Tensor::tplus, "Explicit tensor addition")
         .def("tminus", &Tensor::tminus, "Explicit tensor subtraction")
+        .def("elementwise_multiply", &Tensor::elementwise_multiply, "Element-wise multiplication")
+        .def("scalar_multiply", &Tensor::scalar_multiply, "Scalar multiplication")
 
         // Element wise operations
 

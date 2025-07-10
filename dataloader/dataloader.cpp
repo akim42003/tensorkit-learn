@@ -22,13 +22,35 @@ void DataLoader::loadData(const std::string& file_path, const std::vector<size_t
     }
 
     std::string line;
+    bool first_line = true;
     while (std::getline(file, line)) {
+        // Skip header row
+        if (first_line) {
+            first_line = false;
+            continue;
+        }
+        
         std::istringstream line_stream(line);
         std::vector<float> values;
         std::string cell;
 
         while (std::getline(line_stream, cell, ',')) {
-            values.push_back(std::stof(cell)); // Convert string to float
+            // Trim whitespace
+            cell.erase(0, cell.find_first_not_of(" \t\r\n"));
+            cell.erase(cell.find_last_not_of(" \t\r\n") + 1);
+            
+            // Skip empty cells
+            if (cell.empty()) {
+                continue;
+            }
+            
+            try {
+                values.push_back(std::stof(cell)); // Convert string to float
+            } catch (const std::invalid_argument& e) {
+                throw std::runtime_error("Invalid float value: '" + cell + "' in file: " + file_path);
+            } catch (const std::out_of_range& e) {
+                throw std::runtime_error("Float value out of range: '" + cell + "' in file: " + file_path);
+            }
         }
 
         size_t total_size = 1;
