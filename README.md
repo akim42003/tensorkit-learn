@@ -9,9 +9,8 @@ tensorkit-learn is a hybrid C++/Python machine learning framework that demonstra
 ### Key Features
 
 - **Custom Tensor Library**: N-dimensional array operations implemented in C++ with full broadcasting support
-- **Machine Learning Models**: GLM (Generalized Linear Models) and SVM (Support Vector Machines) with kernel methods
+- **Machine Learning Models**: MLP (Multilayer Perceptron), GLM (Generalized Linear Models) and SVM (Support Vector Machines) with kernel methods
 - **Modular Architecture**: Separate components for tensors, optimizers, loss functions, and models
-- **Educational Focus**: Clean, readable code prioritizing understanding over optimization
 - **Python Bindings**: Seamless integration between C++ performance and Python flexibility
 
 ## Architecture
@@ -103,14 +102,7 @@ cd build
 
 3. Build the C++ components and Python bindings:
 ```bash
-cmake ..
-make -j$(nproc)
-```
-
-4. Install the Python module:
-```bash
-cd ..
-pip install -e .
+./build.sh
 ```
 
 ## Usage
@@ -127,7 +119,7 @@ c = tensor_slow.Tensor.from_values([[1, 2], [3, 4]], [2, 2])
 
 # Operations
 result = a + b  # Element-wise addition
-matmul_result = c @ c.transpose()  # Matrix multiplication
+matmul_result = b.matmul(a)  # Matrix multiplication
 ```
 
 ### Generalized Linear Models (GLM)
@@ -227,27 +219,11 @@ regressor.fit(X_train, y_train, epochs=200, learning_rate=0.001)
 predictions = regressor.predict(X_test)
 ```
 
-### Custom Loss Functions
-
-```python
-from ml_models.optimizers.loss_functions import Loss
-import tensor_slow
-
-class CustomLoss(Loss):
-    def forward(self, y_true, y_pred):
-        # Implement forward pass
-        return loss_tensor
-
-    def backward(self, y_true, y_pred):
-        # Implement gradient computation
-        return gradient_tensor
-```
-
 ## Components
 
 ### Tensor Operations
 - Basic arithmetic: `+`, `-`, `*`, `/`
-- Matrix operations: `@` (matmul), `transpose()`, `inverse()`
+- Matrix operations: `matmul()`, `transpose()`, `inverse()`
 - Element-wise functions: `log()`, `exp()`, `clamp()`
 - Creation methods: `zeros()`, `ones()`, `from_values()`
 
@@ -259,7 +235,6 @@ class CustomLoss(Loss):
 ### Optimizers and Loss Functions
 - Binary Cross-Entropy (BCE) Loss
 - Mean Squared Error (MSE) Loss
-- Gradient-based optimization with configurable learning rates
 
 ### Link Functions (C++)
 - IdentityLink: For linear regression
@@ -279,14 +254,11 @@ class CustomLoss(Loss):
 - ✅ Multi-layer Perceptron (MLP) with C++ implementation
 - ✅ Activation functions (ReLU, Sigmoid, Tanh, Linear)
 
-### In Progress
-- 🚧 Decision Trees / Gradient Boosting
-
-### Future Work
-- 🔮 Convolutional operations
-- 🔮 Recurrent neural networks
-- 🔮 Advanced optimizers (Adam, RMSprop)
-- 🔮 GPU acceleration
+# Future Work
+- Convolutional operations
+- Gradient Boosting and Tree models
+- Advanced optimizers (Adam, RMSprop)
+- GPU acceleration
 
 ## Testing
 
@@ -312,11 +284,6 @@ python tests/lf_test.py
 python tests/ce_test.py  # Cross-entropy loss
 python tests/mse_test.py # MSE loss
 ```
-
-## Contributing
-
-This is an educational project aimed at understanding ML fundamentals. Contributions that enhance clarity, add educational value, or implement new algorithms from scratch are welcome.
-
 
 ## Acknowledgments
 
