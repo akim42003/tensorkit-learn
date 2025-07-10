@@ -85,7 +85,7 @@ tensorkit-learn/
 
 ### Prerequisites
 
-- Python 3.7+
+- Python 3.9+
 - C++11 compatible compiler (g++, clang++)
 - CMake 3.12+
 - pybind11
@@ -122,7 +122,7 @@ b = tensor_slow.Tensor.ones([3, 3])
 c = tensor_slow.Tensor.from_values([[1, 2], [3, 4]], [2, 2])
 
 # Operations
-result = a + b  # Element-wise addition
+result = a.tplus(b)  # Element-wise addition
 matmul_result = b.matmul(a)  # Matrix multiplication
 ```
 ### Data Loading from CSV
@@ -239,7 +239,7 @@ predictions = regressor.predict(X_test)
 ## Components
 
 ### Tensor Operations
-- Basic arithmetic: `+`, `-`, `*`, `/`
+- Basic arithmetic: `tplus`, `tminus`, `elementwise_multiply`, `divide`, `log`, `exp`
 - Matrix operations: `matmul()`, `transpose()`, `inverse()`
 - Element-wise functions: `log()`, `exp()`, `clamp()`
 - Creation methods: `zeros()`, `ones()`, `from_values()`
