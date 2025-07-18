@@ -260,7 +260,7 @@ predictions = regressor.predict(X_test)
 
 ## Development Status
 
-### Completed ✅
+### Completed 
 - Core tensor operations in C++
 - Python bindings for all components
 - Generalized Linear Models (GLM)
@@ -304,11 +304,11 @@ python tests/ce_test.py
 ### Test Coverage
 
 The comprehensive test suite includes:
-- ✅ **DataLoader**: CSV loading, batching, shuffling functionality
-- ✅ **GLM**: Classification (LogitLink) and regression (IdentityLink)
-- ✅ **MLP**: Classification and regression with multi-layer networks
-- ✅ **SVM**: Linear, polynomial, and RBF kernel classification
-- ✅ **Performance**: Accuracy and MSE evaluation across models
+- **DataLoader**: CSV loading, batching, shuffling functionality
+- **GLM**: Classification (LogitLink) and regression (IdentityLink)
+- **MLP**: Classification and regression with multi-layer networks
+- **SVM**: Linear, polynomial, and RBF kernel classification
+- **Performance**: Accuracy and MSE evaluation across models
 
 ### Test Data
 
