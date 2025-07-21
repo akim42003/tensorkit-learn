@@ -1,0 +1,45 @@
+# Virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Build files
+build/
+*.so
+*.o
+*.a
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# MacOS-specific files
+.DS_Store
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Compiled binaries
+tensor_test
+link
+dl
+a.out
+loss_functions
+
+# Python egg info
+*.egg-info/
+
+# OS-specific files
+Thumbs.db
+.directory
