@@ -81,16 +81,16 @@ tensorkit-learn/
 └── build/                 # Build artifacts (generated)
 ```
 
-## Installation
+## Quick Start
 
 ### Prerequisites
 
 - Python 3.9+
 - C++11 compatible compiler (g++, clang++)
 - CMake 3.12+
-- pybind11
+- make
 
-### Building from Source
+### Installation
 
 1. Clone the repository:
 ```bash
@@ -98,15 +98,27 @@ git clone https://github.com/yourusername/tensorkit-learn.git
 cd tensorkit-learn
 ```
 
-2. Create a build directory:
+2. Create and activate a virtual environment (recommended):
 ```bash
-mkdir build
-cd build
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Build the C++ components and Python bindings:
+3. Install Python dependencies:
+```bash
+pip install pybind11
+```
+
+4. Build the C++ components and Python bindings:
 ```bash
 ./build.sh
+```
+
+### Clean Build
+
+To rebuild from scratch:
+```bash
+./build.sh clean
 ```
 
 ## Usage
